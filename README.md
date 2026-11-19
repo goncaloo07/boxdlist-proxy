@@ -6,7 +6,7 @@ It keeps the TMDB API key on the server, so the key is never shipped inside the 
 
 ## How it works
 
-BoxdList sends a film name and year. The function searches TMDB, takes the best match and sends back only the genres, the runtime and the synopsis.
+BoxdList sends a film name and year. The function searches TMDB for a film and, if there is none, for a TV series. It takes the best match and sends back only the genres, the runtime and the synopsis.
 
 ## Endpoint
 
@@ -29,14 +29,16 @@ Example response:
 }
 ```
 
-`runtime` is in minutes. TMDB may return an empty `overview` or a missing `runtime` for some films.
+`runtime` is in minutes. It is `null` for TV series, because TMDB only has the length of one episode. TMDB may also return an empty `overview` or a missing `runtime` for some films.
+
+For series, the year is matched with the first air date.
 
 ### Errors
 
 | Status | Meaning |
 | --- | --- |
 | `400` | `name` is missing, empty or longer than 200 characters |
-| `404` | TMDB has no film that matches |
+| `404` | TMDB has no film or series that matches. The body is `{"error": "Not found"}` and BoxdList relies on that exact text |
 | `500` | The `TMDB_KEY` variable is not set |
 | `502` | TMDB did not answer or answered with an error |
 
