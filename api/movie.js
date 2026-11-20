@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
         }
         if (id === null) {return res.status(404).json({ error: "Not found"});}   // the app relies on this exact text
 
-        const response = await fetch(`${TMDB}/${kind}/${id}?api_key=${key}&language=en-US`);
+        const response = await fetch(`${TMDB}/${kind}/${id}?api_key=${key}&language=en-US&append_to_response=external_ids`);
         if (!response.ok) throw new Error("TMDB error");
         const details = await response.json();
 
@@ -41,6 +41,8 @@ module.exports = async (req, res) => {
             // series only have the length of one episode, so it is left out
             runtime: kind === "movie" ? details.runtime : null,
             overview: details.overview,   // the synopsis
+            // some titles have no IMDb id, so fall back to null
+            imdb_id: details.external_ids?.imdb_id || null,
         };
         res.setHeader("Cache-Control", "s-maxage=86400");   // Vercel keeps this answer for 1 day
         res.status(200).json(result);
